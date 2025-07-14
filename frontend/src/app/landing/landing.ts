@@ -11,6 +11,8 @@ import { AuthService } from '../auth.service';
   styleUrl: './landing.css'
 })
 export class LandingComponent {
+  mobileMenuOpen = false;
+
   constructor(
     private router: Router,
     private authService: AuthService
@@ -28,5 +30,9 @@ export class LandingComponent {
   scrollToAbout(): void {
     const element = document.getElementById('about');
     element?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 }

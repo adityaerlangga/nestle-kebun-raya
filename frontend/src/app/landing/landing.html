@@ -1,147 +1,161 @@
 <!-- Navigation -->
-<nav class="navbar">
-  <div class="nav-container">
+<nav class="fixed top-0 left-0 right-0 glass-effect border-b border-gray-200/50 z-50 py-4">
+  <div class="container flex justify-between items-center">
     <div class="nav-logo">
-      <h2>🌿 Nestle Kebun Raya</h2>
+      <h2 class="text-2xl font-bold gradient-text">🌿 Nestle Kebun Raya</h2>
     </div>
-    <div class="nav-links">
-      <a href="#features" (click)="scrollToFeatures()">Features</a>
-      <a href="#about" (click)="scrollToAbout()">About</a>
-      <button class="nav-cta" (click)="loginWithGoogle()">Login With Google</button>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#features" (click)="scrollToFeatures()" class="nav-link">Features</a>
+      <a href="#about" (click)="scrollToAbout()" class="nav-link">About</a>
+      <button class="btn btn-primary" (click)="loginWithGoogle()">Login With Google</button>
+    </div>
+    <!-- Mobile menu button -->
+    <button class="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" (click)="toggleMobileMenu()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div class="md:hidden bg-white border-t border-gray-200 shadow-lg" *ngIf="mobileMenuOpen">
+    <div class="container py-4 space-y-4">
+      <a href="#features" (click)="scrollToFeatures(); mobileMenuOpen = false" class="block nav-link py-2">Features</a>
+      <a href="#about" (click)="scrollToAbout(); mobileMenuOpen = false" class="block nav-link py-2">About</a>
+      <button class="btn btn-primary w-full" (click)="loginWithGoogle(); mobileMenuOpen = false">Login With Google</button>
     </div>
   </div>
 </nav>
 
 <!-- Hero Section -->
-<section class="hero">
-  <div class="hero-container">
+<section class="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center pt-20">
+  <div class="container grid lg:grid-cols-2 gap-16 items-center">
     <div class="hero-content">
-      <h1 class="hero-title">
+      <h1 class="text-5xl lg:text-6xl font-extrabold leading-tight mb-8 text-gray-900">
         Welcome to <span class="gradient-text">Nestle Kebun Raya</span>
       </h1>
-      <p class="hero-subtitle">
+      <p class="text-xl text-gray-600 mb-10 leading-relaxed">
         Experience the future of sustainable agriculture and botanical research. 
         Join our community of researchers, botanists, and nature enthusiasts.
       </p>
-      <div class="hero-buttons">
-        <button class="btn-primary" (click)="loginWithGoogle()">
+      <div class="flex gap-6 flex-wrap">
+        <button class="btn btn-primary btn-large" (click)="loginWithGoogle()">
           <span>🔐 Login With Google</span>
         </button>
-        <button class="btn-secondary" (click)="scrollToFeatures()">
+        <button class="btn btn-secondary btn-large" (click)="scrollToFeatures()">
           <span>✨ Learn More</span>
         </button>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="hero-card">
-        <div class="card-icon">🌱</div>
-        <h3>Plant Research</h3>
-        <p>Advanced botanical studies and research tools</p>
+    <div class="grid grid-cols-2 gap-6 grid-rows-2">
+      <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <h3 class="feature-title">Plant Research</h3>
+        <p class="feature-description">Advanced botanical studies and research tools</p>
       </div>
-      <div class="hero-card">
-        <div class="card-icon">🔬</div>
-        <h3>Data Analytics</h3>
-        <p>Comprehensive data analysis and insights</p>
+      <div class="feature-card row-span-2">
+        <div class="feature-icon">🔬</div>
+        <h3 class="feature-title">Data Analytics</h3>
+        <p class="feature-description">Comprehensive data analysis and insights</p>
       </div>
-      <div class="hero-card">
-        <div class="card-icon">🌍</div>
-        <h3>Sustainability</h3>
-        <p>Environmental conservation and green initiatives</p>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3 class="feature-title">Sustainability</h3>
+        <p class="feature-description">Environmental conservation and green initiatives</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Features Section -->
-<section id="features" class="features">
+<section id="features" class="py-32 bg-white">
   <div class="container">
     <div class="section-header">
       <h2>Why Choose Nestle Kebun Raya?</h2>
       <p>Discover the powerful features that make us the leading platform for botanical research</p>
     </div>
     
-    <div class="features-grid">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div class="feature-card">
         <div class="feature-icon">🔐</div>
-        <h3>Secure Authentication</h3>
-        <p>Google OAuth integration ensures secure and seamless access to your research data.</p>
+        <h3 class="feature-title">Secure Authentication</h3>
+        <p class="feature-description">Google OAuth integration ensures secure and seamless access to your research data.</p>
       </div>
       
       <div class="feature-card">
         <div class="feature-icon">📊</div>
-        <h3>Real-time Analytics</h3>
-        <p>Monitor plant growth, environmental conditions, and research progress in real-time.</p>
+        <h3 class="feature-title">Real-time Analytics</h3>
+        <p class="feature-description">Monitor plant growth, environmental conditions, and research progress in real-time.</p>
       </div>
       
       <div class="feature-card">
         <div class="feature-icon">🤝</div>
-        <h3>Collaboration Tools</h3>
-        <p>Work together with researchers worldwide on groundbreaking botanical discoveries.</p>
+        <h3 class="feature-title">Collaboration Tools</h3>
+        <p class="feature-description">Work together with researchers worldwide on groundbreaking botanical discoveries.</p>
       </div>
       
       <div class="feature-card">
         <div class="feature-icon">📱</div>
-        <h3>Mobile Responsive</h3>
-        <p>Access your research data from anywhere, anytime with our mobile-friendly platform.</p>
+        <h3 class="feature-title">Mobile Responsive</h3>
+        <p class="feature-description">Access your research data from anywhere, anytime with our mobile-friendly platform.</p>
       </div>
       
       <div class="feature-card">
         <div class="feature-icon">🌿</div>
-        <h3>Plant Database</h3>
-        <p>Comprehensive database of plant species, characteristics, and research findings.</p>
+        <h3 class="feature-title">Plant Database</h3>
+        <p class="feature-description">Comprehensive database of plant species, characteristics, and research findings.</p>
       </div>
       
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
-        <h3>Lightning Fast</h3>
-        <p>Built with modern technologies for optimal performance and user experience.</p>
+        <h3 class="feature-title">Lightning Fast</h3>
+        <p class="feature-description">Built with modern technologies for optimal performance and user experience.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- About Section -->
-<section id="about" class="about">
+<section id="about" class="py-32 bg-gray-50">
   <div class="container">
-    <div class="about-content">
+    <div class="grid lg:grid-cols-2 gap-20 items-center">
       <div class="about-text">
-        <h2>About Nestle Kebun Raya</h2>
-        <p>
+        <h2 class="text-4xl lg:text-5xl font-bold mb-8 text-gray-900">About Nestle Kebun Raya</h2>
+        <p class="text-lg text-gray-600 mb-8 leading-relaxed">
           Nestle Kebun Raya is a cutting-edge platform dedicated to advancing botanical research 
           and environmental conservation. Our mission is to connect researchers, botanists, and 
           nature enthusiasts worldwide to collaborate on sustainable agriculture initiatives.
         </p>
-        <p>
+        <p class="text-lg text-gray-600 mb-10 leading-relaxed">
           With state-of-the-art technology and a commitment to environmental stewardship, 
           we're building a future where nature and technology work together harmoniously.
         </p>
-        <div class="stats">
-          <div class="stat">
-            <h3>1000+</h3>
-            <p>Researchers</p>
+        <div class="grid grid-cols-3 gap-8">
+          <div class="text-center">
+            <h3 class="text-4xl font-bold text-primary-600 mb-3">1000+</h3>
+            <p class="text-gray-600 font-medium">Researchers</p>
           </div>
-          <div class="stat">
-            <h3>50,000+</h3>
-            <p>Plant Species</p>
+          <div class="text-center">
+            <h3 class="text-4xl font-bold text-primary-600 mb-3">50,000+</h3>
+            <p class="text-gray-600 font-medium">Plant Species</p>
           </div>
-          <div class="stat">
-            <h3>100+</h3>
-            <p>Countries</p>
+          <div class="text-center">
+            <h3 class="text-4xl font-bold text-primary-600 mb-3">100+</h3>
+            <p class="text-gray-600 font-medium">Countries</p>
           </div>
         </div>
       </div>
-      <div class="about-visual">
-        <div class="visual-card">
-          <div class="visual-icon">🌱</div>
-          <h4>Research Excellence</h4>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="feature-card">
+          <div class="feature-icon">🌱</div>
+          <h4 class="feature-title">Research Excellence</h4>
         </div>
-        <div class="visual-card">
-          <div class="visual-icon">🌍</div>
-          <h4>Global Impact</h4>
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h4 class="feature-title">Global Impact</h4>
         </div>
-        <div class="visual-card">
-          <div class="visual-icon">🔬</div>
-          <h4>Innovation</h4>
+        <div class="feature-card col-span-2">
+          <div class="feature-icon">🔬</div>
+          <h4 class="feature-title">Innovation</h4>
         </div>
       </div>
     </div>
@@ -149,12 +163,12 @@
 </section>
 
 <!-- CTA Section -->
-<section class="cta">
-  <div class="container">
-    <div class="cta-content">
-      <h2>Ready to Start Your Research Journey?</h2>
-      <p>Join thousands of researchers and botanists making a difference in the world</p>
-      <button class="btn-primary btn-large" (click)="loginWithGoogle()">
+<section class="py-32 bg-gradient-to-r from-primary-500 to-primary-600">
+  <div class="container text-center">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-4xl lg:text-5xl font-bold mb-8 text-white">Ready to Start Your Research Journey?</h2>
+      <p class="text-xl text-white/90 mb-10 leading-relaxed">Join thousands of researchers and botanists making a difference in the world</p>
+      <button class="btn btn-xl bg-white text-primary-600 hover:bg-gray-50 hover:-translate-y-1 shadow-primary" (click)="loginWithGoogle()">
         <span>🔐 Login With Google</span>
       </button>
     </div>
@@ -162,27 +176,29 @@
 </section>
 
 <!-- Footer -->
-<footer class="footer">
+<footer class="bg-gray-900 text-white py-20">
   <div class="container">
-    <div class="footer-content">
+    <div class="grid md:grid-cols-3 gap-12 mb-12">
       <div class="footer-section">
-        <h3>🌿 Nestle Kebun Raya</h3>
-        <p>Advancing botanical research and environmental conservation through technology.</p>
+        <h3 class="text-2xl font-bold mb-6 gradient-text">🌿 Nestle Kebun Raya</h3>
+        <p class="text-gray-300 leading-relaxed">Advancing botanical research and environmental conservation through technology.</p>
       </div>
       <div class="footer-section">
-        <h4>Quick Links</h4>
-        <a href="#features">Features</a>
-        <a href="#about">About</a>
-        <a (click)="loginWithGoogle()">Login</a>
+        <h4 class="text-lg font-semibold mb-6">Quick Links</h4>
+        <div class="space-y-3">
+          <a href="#features" class="block text-gray-300 hover:text-white transition-colors">Features</a>
+          <a href="#about" class="block text-gray-300 hover:text-white transition-colors">About</a>
+          <a (click)="loginWithGoogle()" class="block text-gray-300 hover:text-white transition-colors cursor-pointer">Login</a>
+        </div>
       </div>
       <div class="footer-section">
-        <h4>Contact</h4>
-        <p>Email: info.com</p>
-        <p>Phone: +62 21 1234 5678</p>
+        <h4 class="text-lg font-semibold mb-6">Contact</h4>
+        <p class="text-gray-300 mb-3">Email: info.com</p>
+        <p class="text-gray-300">Phone: +62 21 1234 5678</p>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2024 Nestle Kebun Raya. All rights reserved.</p>
+    <div class="border-t border-gray-800 pt-8 text-center">
+      <p class="text-gray-400">&copy; 2024 Nestle Kebun Raya. All rights reserved.</p>
     </div>
   </div>
 </footer>
