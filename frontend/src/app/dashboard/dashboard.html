@@ -1,0 +1,360 @@
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading your dashboard...</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="error && !loading">
+  <div class="error-message">
+    <h3>⚠️ Error</h3>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="logout()">Try Again</button>
+  </div>
+</div>
+
+<!-- Dashboard Content -->
+<div class="dashboard-container" *ngIf="!loading && !error && user">
+  <!-- Navbar -->
+  <nav class="navbar" (document:click)="closeUserMenu()">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <h2>🌿 Nestle Kebun Raya</h2>
+      </div>
+      <div class="nav-actions">
+        <div class="nav-item alert-icon" (click)="showAlerts()">
+          <div class="circle-icon alert-circle">
+            <span class="icon">⚠️</span>
+            <span class="notification-badge">3</span>
+          </div>
+        </div>
+        <div class="nav-item excel-icon" (click)="exportToExcel()">
+          <div class="circle-icon excel-circle">
+            <span class="icon">📊</span>
+          </div>
+        </div>
+        <div class="nav-item user-avatar" (click)="$event.stopPropagation(); toggleUserMenu()">
+          <div class="circle-icon avatar-circle">
+            <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar" class="avatar-img">
+            <div class="avatar-placeholder" *ngIf="!user.avatar">
+              {{ user.name.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+          
+          <!-- User Dropdown Menu -->
+          <div class="user-dropdown" *ngIf="showUserDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-avatar">
+                <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar" class="avatar-img">
+                <div class="avatar-placeholder" *ngIf="!user.avatar">
+                  {{ user.name.charAt(0).toUpperCase() }}
+                </div>
+              </div>
+              <div class="dropdown-user-info">
+                <h4>{{ user.name }}</h4>
+                <p>{{ user.email }}</p>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item" (click)="logout()">
+                <span class="dropdown-icon">👤</span>
+                <span>Manage Account</span>
+              </div>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item" (click)="logout()">
+                <span class="dropdown-icon">🚪</span>
+                <span>Logout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="user-info">
+    <div class="user-avatar">
+      <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar">
+      <div class="avatar-placeholder" *ngIf="!user.avatar">
+        {{ user.name.charAt(0).toUpperCase() }}
+      </div>
+    </div>
+    
+    <div class="user-details">
+      <h2>{{ user.name }}</h2>
+      <p>{{ user.email }}</p>
+      <div class="user-badge">
+        <span class="badge">Google User</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Temperature Sensors Section -->
+  <div class="temperature-sensors-section">
+    <div class="section-header">
+      <h2>🌡️ Temperature Sensors</h2>
+      <p>Real-time temperature monitoring across all sensors</p>
+    </div>
+    
+    <!-- Individual Sensor Rows -->
+    <div class="sensor-rows" *ngIf="sensorsData.length > 0">
+      <div class="sensor-row" *ngFor="let sensor of sensorsData; let i = index">
+        <div class="sensor-info">
+          <div class="sensor-header">
+            <h3>{{ sensor.name }}</h3>
+            <div class="sensor-status" [class.online]="sensor.latest_value !== null">
+              <span class="status-dot"></span>
+              {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
+            </div>
+          </div>
+          
+          <div class="sensor-value" *ngIf="sensor.latest_value !== null">
+            <span class="temperature">{{ sensor.latest_value }}°C</span>
+            <span class="timestamp">{{ sensor.latest_timestamp | date:'short' }}</span>
+          </div>
+          
+          <div class="sensor-value offline" *ngIf="sensor.latest_value === null">
+            <span class="temperature">--°C</span>
+            <span class="timestamp">No data</span>
+          </div>
+        </div>
+        
+        <div class="sensor-chart">
+          <div class="chart-header">
+            <h4>📊 {{ sensor.name }} - Temperature Trends (Last 24 Hours)</h4>
+          </div>
+          
+          <div class="chart-wrapper">
+            <apx-chart
+              [series]="getChartSeries(sensor)"
+              [chart]="getChartOptions(sensor)"
+              [colors]="getChartColors(i)"
+              [stroke]="getChartStroke()"
+              [fill]="getChartFill()"
+              [markers]="getChartMarkers(i)"
+              [xaxis]="getChartXAxis()"
+              [yaxis]="getChartYAxis()"
+              [legend]="getChartLegend()"
+              [tooltip]="getChartTooltip()"
+              [grid]="getChartGrid()"
+              [theme]="getChartTheme()">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- No Data State -->
+    <div class="no-data-state" *ngIf="sensorsData.length === 0">
+      <div class="no-data-content">
+        <div class="no-data-icon">🌡️</div>
+        <h3>No Temperature Sensors Found</h3>
+        <p>No temperature sensor data is available at the moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Soil Moisture Sensors Section -->
+  <div class="temperature-sensors-section">
+    <div class="section-header">
+      <h2>💧 Soil Moisture Sensors</h2>
+      <p>Real-time soil moisture monitoring across all sensors</p>
+    </div>
+    <div class="sensor-rows" *ngIf="soilMoistureSensorsData.length > 0">
+      <div class="sensor-row" *ngFor="let sensor of soilMoistureSensorsData; let i = index">
+        <div class="sensor-info">
+          <div class="sensor-header">
+            <h3>{{ sensor.name }}</h3>
+            <div class="sensor-status" [class.online]="sensor.latest_value !== null">
+              <span class="status-dot"></span>
+              {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
+            </div>
+          </div>
+          <div class="sensor-value" *ngIf="sensor.latest_value !== null">
+            <span class="temperature">{{ sensor.latest_value }}%</span>
+            <span class="timestamp">{{ sensor.latest_timestamp | date:'short' }}</span>
+          </div>
+          <div class="sensor-value offline" *ngIf="sensor.latest_value === null">
+            <span class="temperature">--%</span>
+            <span class="timestamp">No data</span>
+          </div>
+        </div>
+        <div class="sensor-chart">
+          <div class="chart-header">
+            <h4>📊 {{ sensor.name }} - Soil Moisture Trends (Last 24 Hours)</h4>
+          </div>
+          <div class="chart-wrapper">
+            <apx-chart
+              [series]="getSoilMoistureChartSeries(sensor)"
+              [chart]="getChartOptions(sensor)"
+              [colors]="getChartColors(i)"
+              [stroke]="getChartStroke()"
+              [fill]="getChartFill()"
+              [markers]="getChartMarkers(i)"
+              [xaxis]="getChartXAxis()"
+              [yaxis]="getSoilMoistureChartYAxis()"
+              [legend]="getChartLegend()"
+              [tooltip]="getSoilMoistureChartTooltip()"
+              [grid]="getChartGrid()"
+              [theme]="getChartTheme()">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="no-data-state" *ngIf="soilMoistureSensorsData.length === 0">
+      <div class="no-data-content">
+        <div class="no-data-icon">💧</div>
+        <h3>No Soil Moisture Sensors Found</h3>
+        <p>No soil moisture sensor data is available at the moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Light Sensors Section -->
+  <div class="temperature-sensors-section">
+    <div class="section-header">
+      <h2>💡 Light Sensors</h2>
+      <p>Real-time light intensity monitoring across all sensors</p>
+    </div>
+    <div class="sensor-rows" *ngIf="lightSensorsData.length > 0">
+      <div class="sensor-row" *ngFor="let sensor of lightSensorsData; let i = index">
+        <div class="sensor-info">
+          <div class="sensor-header">
+            <h3>{{ sensor.name }}</h3>
+            <div class="sensor-status" [class.online]="sensor.latest_value !== null">
+              <span class="status-dot"></span>
+              {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
+            </div>
+          </div>
+          <div class="sensor-value" *ngIf="sensor.latest_value !== null">
+            <span class="temperature">{{ sensor.latest_value }} lux</span>
+            <span class="timestamp">{{ sensor.latest_timestamp | date:'short' }}</span>
+          </div>
+          <div class="sensor-value offline" *ngIf="sensor.latest_value === null">
+            <span class="temperature">-- lux</span>
+            <span class="timestamp">No data</span>
+          </div>
+        </div>
+        <div class="sensor-chart">
+          <div class="chart-header">
+            <h4>📊 {{ sensor.name }} - Light Intensity Trends (Last 24 Hours)</h4>
+          </div>
+          <div class="chart-wrapper">
+            <apx-chart
+              [series]="getLightChartSeries(sensor)"
+              [chart]="getChartOptions(sensor)"
+              [colors]="getChartColors(i)"
+              [stroke]="getChartStroke()"
+              [fill]="getChartFill()"
+              [markers]="getChartMarkers(i)"
+              [xaxis]="getChartXAxis()"
+              [yaxis]="getLightChartYAxis()"
+              [legend]="getChartLegend()"
+              [tooltip]="getLightChartTooltip()"
+              [grid]="getChartGrid()"
+              [theme]="getChartTheme()">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="no-data-state" *ngIf="lightSensorsData.length === 0">
+      <div class="no-data-content">
+        <div class="no-data-icon">💡</div>
+        <h3>No Light Sensors Found</h3>
+        <p>No light sensor data is available at the moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Turbidity Sensors Section -->
+  <div class="temperature-sensors-section">
+    <div class="section-header">
+      <h2>🌫️ Turbidity Sensors</h2>
+      <p>Real-time turbidity monitoring across all sensors</p>
+    </div>
+    <div class="sensor-rows" *ngIf="turbiditySensorsData.length > 0">
+      <div class="sensor-row" *ngFor="let sensor of turbiditySensorsData; let i = index">
+        <div class="sensor-info">
+          <div class="sensor-header">
+            <h3>{{ sensor.name }}</h3>
+            <div class="sensor-status" [class.online]="sensor.latest_value !== null">
+              <span class="status-dot"></span>
+              {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
+            </div>
+          </div>
+          <div class="sensor-value" *ngIf="sensor.latest_value !== null">
+            <span class="temperature">{{ sensor.latest_value }} NTU</span>
+            <span class="timestamp">{{ sensor.latest_timestamp | date:'short' }}</span>
+          </div>
+          <div class="sensor-value offline" *ngIf="sensor.latest_value === null">
+            <span class="temperature">-- NTU</span>
+            <span class="timestamp">No data</span>
+          </div>
+        </div>
+        <div class="sensor-chart">
+          <div class="chart-header">
+            <h4>📊 {{ sensor.name }} - Turbidity Trends (Last 24 Hours)</h4>
+          </div>
+          <div class="chart-wrapper">
+            <apx-chart
+              [series]="getTurbidityChartSeries(sensor)"
+              [chart]="getChartOptions(sensor)"
+              [colors]="getChartColors(i)"
+              [stroke]="getChartStroke()"
+              [fill]="getChartFill()"
+              [markers]="getChartMarkers(i)"
+              [xaxis]="getChartXAxis()"
+              [yaxis]="getTurbidityChartYAxis()"
+              [legend]="getChartLegend()"
+              [tooltip]="getTurbidityChartTooltip()"
+              [grid]="getChartGrid()"
+              [theme]="getChartTheme()">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="no-data-state" *ngIf="turbiditySensorsData.length === 0">
+      <div class="no-data-content">
+        <div class="no-data-icon">🌫️</div>
+        <h3>No Turbidity Sensors Found</h3>
+        <p>No turbidity sensor data is available at the moment.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-content">
+    <div class="welcome-message">
+      <h3>🎉 Successfully logged in!</h3>
+      <p>You are now authenticated with Google OAuth.</p>
+    </div>
+    
+    <div class="feature-cards">
+      <div class="feature-card">
+        <h4>🔐 Secure Authentication</h4>
+        <p>Your account is securely authenticated through Google OAuth.</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>👤 User Profile</h4>
+        <p>Your Google profile information is automatically synced.</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🌡️ Temperature Monitoring</h4>
+        <p>Real-time temperature data from multiple sensors across the facility.</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>📊 Data Analytics</h4>
+        <p>Interactive charts and analytics for temperature trends and patterns.</p>
+      </div>
+    </div>
+  </div>
+</div>

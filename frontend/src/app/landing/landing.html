@@ -1,0 +1,188 @@
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-logo">
+      <h2>🌿 Nestle Kebun Raya</h2>
+    </div>
+    <div class="nav-links">
+      <a href="#features" (click)="scrollToFeatures()">Features</a>
+      <a href="#about" (click)="scrollToAbout()">About</a>
+      <button class="nav-cta" (click)="loginWithGoogle()">Login With Google</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Welcome to <span class="gradient-text">Nestle Kebun Raya</span>
+      </h1>
+      <p class="hero-subtitle">
+        Experience the future of sustainable agriculture and botanical research. 
+        Join our community of researchers, botanists, and nature enthusiasts.
+      </p>
+      <div class="hero-buttons">
+        <button class="btn-primary" (click)="loginWithGoogle()">
+          <span>🔐 Login With Google</span>
+        </button>
+        <button class="btn-secondary" (click)="scrollToFeatures()">
+          <span>✨ Learn More</span>
+        </button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="card-icon">🌱</div>
+        <h3>Plant Research</h3>
+        <p>Advanced botanical studies and research tools</p>
+      </div>
+      <div class="hero-card">
+        <div class="card-icon">🔬</div>
+        <h3>Data Analytics</h3>
+        <p>Comprehensive data analysis and insights</p>
+      </div>
+      <div class="hero-card">
+        <div class="card-icon">🌍</div>
+        <h3>Sustainability</h3>
+        <p>Environmental conservation and green initiatives</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+  <div class="container">
+    <div class="section-header">
+      <h2>Why Choose Nestle Kebun Raya?</h2>
+      <p>Discover the powerful features that make us the leading platform for botanical research</p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Secure Authentication</h3>
+        <p>Google OAuth integration ensures secure and seamless access to your research data.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Real-time Analytics</h3>
+        <p>Monitor plant growth, environmental conditions, and research progress in real-time.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🤝</div>
+        <h3>Collaboration Tools</h3>
+        <p>Work together with researchers worldwide on groundbreaking botanical discoveries.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Mobile Responsive</h3>
+        <p>Access your research data from anywhere, anytime with our mobile-friendly platform.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <h3>Plant Database</h3>
+        <p>Comprehensive database of plant species, characteristics, and research findings.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Lightning Fast</h3>
+        <p>Built with modern technologies for optimal performance and user experience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="about">
+  <div class="container">
+    <div class="about-content">
+      <div class="about-text">
+        <h2>About Nestle Kebun Raya</h2>
+        <p>
+          Nestle Kebun Raya is a cutting-edge platform dedicated to advancing botanical research 
+          and environmental conservation. Our mission is to connect researchers, botanists, and 
+          nature enthusiasts worldwide to collaborate on sustainable agriculture initiatives.
+        </p>
+        <p>
+          With state-of-the-art technology and a commitment to environmental stewardship, 
+          we're building a future where nature and technology work together harmoniously.
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <h3>1000+</h3>
+            <p>Researchers</p>
+          </div>
+          <div class="stat">
+            <h3>50,000+</h3>
+            <p>Plant Species</p>
+          </div>
+          <div class="stat">
+            <h3>100+</h3>
+            <p>Countries</p>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual">
+        <div class="visual-card">
+          <div class="visual-icon">🌱</div>
+          <h4>Research Excellence</h4>
+        </div>
+        <div class="visual-card">
+          <div class="visual-icon">🌍</div>
+          <h4>Global Impact</h4>
+        </div>
+        <div class="visual-card">
+          <div class="visual-icon">🔬</div>
+          <h4>Innovation</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Ready to Start Your Research Journey?</h2>
+      <p>Join thousands of researchers and botanists making a difference in the world</p>
+      <button class="btn-primary btn-large" (click)="loginWithGoogle()">
+        <span>🔐 Login With Google</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>🌿 Nestle Kebun Raya</h3>
+        <p>Advancing botanical research and environmental conservation through technology.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a (click)="loginWithGoogle()">Login</a>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <p>Email: info.com</p>
+        <p>Phone: +62 21 1234 5678</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Nestle Kebun Raya. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
