@@ -7,9 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Google OAuth routes
-Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
-Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+// Google OAuth routes for API (with /api prefix for frontend compatibility)
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 // User routes
 Route::get('/user', [AuthController::class, 'user']);

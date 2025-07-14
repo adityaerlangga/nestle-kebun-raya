@@ -6,6 +6,9 @@ use App\Http\Controllers\TemperatureSensorController;
 use App\Http\Controllers\SoilMoistureSensorController;
 use App\Http\Controllers\LightSensorController;
 use App\Http\Controllers\TurbiditySensorController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +21,11 @@ use App\Http\Controllers\TurbiditySensorController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Auth routes
+Route::post('/logout', [AuthController::class, 'logout']);
+
+// Get authenticated user
+Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
 
 // Temperature Sensor routes
 Route::get('/temperature-sensors', [TemperatureSensorController::class, 'index']);
@@ -44,4 +49,26 @@ Route::get('/light-sensors-names', [LightSensorController::class, 'getSensorName
 Route::get('/turbidity-sensors', [TurbiditySensorController::class, 'index']);
 Route::get('/turbidity-sensors/{sensorName}', [TurbiditySensorController::class, 'show']);
 Route::post('/turbidity-sensors', [TurbiditySensorController::class, 'store']);
-Route::get('/turbidity-sensors-names', [TurbiditySensorController::class, 'getSensorNames']); 
+Route::get('/turbidity-sensors-names', [TurbiditySensorController::class, 'getSensorNames']);
+
+// User Management routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::put('/users/{id}/toggle-access', [UserController::class, 'toggleAccess']);
+});
+
+// Export routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/export/stats', [ExportController::class, 'getExportStats']);
+    Route::get('/export/temperature-sensors', [ExportController::class, 'exportTemperatureSensors']);
+    Route::get('/export/soil-moisture-sensors', [ExportController::class, 'exportSoilMoistureSensors']);
+    Route::get('/export/light-sensors', [ExportController::class, 'exportLightSensors']);
+    Route::get('/export/turbidity-sensors', [ExportController::class, 'exportTurbiditySensors']);
+    Route::get('/export/all-sensors', [ExportController::class, 'exportAllSensors']);
+    
+    // Paginated data routes
+    Route::get('/export/temperature-sensors-data', [ExportController::class, 'getTemperatureSensorsData']);
+    Route::get('/export/soil-moisture-sensors-data', [ExportController::class, 'getSoilMoistureSensorsData']);
+    Route::get('/export/light-sensors-data', [ExportController::class, 'getLightSensorsData']);
+    Route::get('/export/turbidity-sensors-data', [ExportController::class, 'getTurbiditySensorsData']);
+}); 

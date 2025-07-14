@@ -33,10 +33,11 @@ class AuthController extends Controller
                 'avatar' => $googleUser->avatar,
             ]);
 
-            Auth::login($user);
+            // Create Sanctum token for API access
+            $token = $user->createToken('google-auth-token')->plainTextToken;
 
-            // Redirect to Angular frontend dashboard
-            return redirect()->away('http://localhost:4200/dashboard');
+            // Redirect to Angular frontend oauth-callback with token (URL-encoded)
+            return redirect()->away('http://localhost:4200/oauth-callback?token=' . urlencode($token));
 
         } catch (\Exception $e) {
             // Redirect to login page with error
@@ -50,7 +51,12 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            // Check if user is authenticated before trying to logout
+            // Revoke all tokens for the authenticated user
+            if ($request->user()) {
+                $request->user()->tokens()->delete();
+            }
+            
+            // Also handle session logout for web routes
             if (Auth::check()) {
                 Auth::logout();
             }
@@ -82,9 +88,9 @@ class AuthController extends Controller
     /**
      * Get the authenticated user.
      */
-    public function user()
+    public function user(Request $request)
     {
-        $user = Auth::user();
+        $user = $request->user();
         
         if (!$user) {
             return response()->json([
