@@ -7,11 +7,20 @@ import { SoilMoistureSensorService, SensorData as SoilMoistureSensorData } from 
 import { LightSensorService, SensorData as LightSensorData } from '../light-sensor.service';
 import { TurbiditySensorService, SensorData as TurbiditySensorData } from '../turbidity-sensor.service';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { LayoutComponent } from '../shared/layout/layout';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(advancedFormat);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgApexchartsModule],
+  imports: [CommonModule, NgApexchartsModule, LayoutComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -29,8 +38,7 @@ export class DashboardComponent implements OnInit {
   // Turbidity sensor data
   turbiditySensorsData: TurbiditySensorData[] = [];
 
-  // User dropdown state
-  showUserDropdown = false;
+
 
   // Chart color schemes for different sensors
   private chartColors = [
@@ -78,6 +86,11 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.sensorsData = response.data;
+
+          const data = this.sensorsData[0].chart_data;
+          // console.log last 10 data and 10 first data
+          console.log("first 10 data", data.slice(0, 10));
+          console.log("last 10 data", data.slice(-10));
         } else {
           this.error = 'Failed to load temperature sensor data';
         }
@@ -137,33 +150,14 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // Navbar action methods
-  showAlerts(): void {
-    // TODO: Implement alerts modal/page
-    console.log('Show alerts clicked');
-    alert('Alerts feature coming soon!');
-  }
 
-  exportToExcel(): void {
-    // TODO: Implement Excel export functionality
-    console.log('Export to Excel clicked');
-    alert('Excel export feature coming soon!');
-  }
-
-  toggleUserMenu(): void {
-    this.showUserDropdown = !this.showUserDropdown;
-  }
-
-  closeUserMenu(): void {
-    this.showUserDropdown = false;
-  }
 
   // Chart configuration methods for individual sensors
   getChartSeries(sensor: SensorData): any[] {
     return [{
       name: sensor.name,
       data: sensor.chart_data.map(point => ({
-        x: new Date(point.x).getTime(),
+        x: point.x, // keep as string
         y: point.y
       }))
     }];
@@ -232,7 +226,10 @@ export class DashboardComponent implements OnInit {
     return {
       type: 'datetime',
       labels: {
-        format: 'HH:mm',
+        formatter: function(value: string) {
+          // value is a timestamp in ms
+          return dayjs.tz(Number(value), 'Asia/Jakarta').format('MMMM Do, YYYY HH.mm');
+        },
         style: {
           colors: '#666',
           fontSize: '12px'
@@ -305,7 +302,7 @@ export class DashboardComponent implements OnInit {
     return [{
       name: sensor.name,
       data: sensor.chart_data.map(point => ({
-        x: new Date(point.x).getTime(),
+        x: dayjs.tz(point.x, 'Asia/Jakarta').valueOf(),
         y: point.y
       }))
     }];
@@ -314,7 +311,7 @@ export class DashboardComponent implements OnInit {
     return [{
       name: sensor.name,
       data: sensor.chart_data.map(point => ({
-        x: new Date(point.x).getTime(),
+        x: dayjs.tz(point.x, 'Asia/Jakarta').valueOf(),
         y: point.y
       }))
     }];
@@ -323,7 +320,7 @@ export class DashboardComponent implements OnInit {
     return [{
       name: sensor.name,
       data: sensor.chart_data.map(point => ({
-        x: new Date(point.x).getTime(),
+        x: dayjs.tz(point.x, 'Asia/Jakarta').valueOf(),
         y: point.y
       }))
     }];
@@ -406,7 +403,6 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void {
-    this.showUserDropdown = false; // Close dropdown
     this.loading = true;
     this.authService.logout().subscribe({
       next: (response) => {

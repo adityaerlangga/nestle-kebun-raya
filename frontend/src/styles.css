@@ -99,7 +99,7 @@
 
   /* Section Headers */
   .section-header {
-    @apply text-center mb-20;
+    @apply text-center mb-6;
   }
 
   .section-header h2 {

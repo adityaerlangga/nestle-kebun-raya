@@ -1,25 +1,47 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { AuthService, User } from '../auth.service';
+import { Observable } from 'rxjs';
+import { LayoutComponent } from '../shared/layout/layout';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LayoutComponent],
   templateUrl: './landing.html',
   styleUrl: './landing.css'
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
   mobileMenuOpen = false;
+  user$: Observable<User | null>;
 
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    this.user$ = this.authService.currentUser$;
+  }
+
+  ngOnInit(): void {
+    // Check authentication status when component initializes
+    this.authService.checkAuth().subscribe();
+  }
 
   loginWithGoogle(): void {
     this.authService.loginWithGoogle();
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe();
+  }
+
+  goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  goToManageAccount(): void {
+    this.router.navigate(['/manage-account']);
   }
 
   scrollToFeatures(): void {
@@ -28,11 +50,14 @@ export class LandingComponent {
   }
 
   scrollToAbout(): void {
-    const element = document.getElementById('about');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  goToContact(): void {
+    this.router.navigate(['/contact']);
   }
 }

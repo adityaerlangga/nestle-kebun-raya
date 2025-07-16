@@ -33,11 +33,11 @@ class DatabaseSeeder extends Seeder
 
         // Seed sensor data
         $this->call([
-            // TemperatureSensorSeeder::class,
+            TemperatureSensorSeeder::class,
             SoilMoistureSensorSeeder::class,
             LightSensorSeeder::class,
             TurbiditySensorSeeder::class,
-            // RoleSeeder::class,
+            RoleSeeder::class,
         ]);
     }
 }

@@ -1,393 +1,276 @@
-<!-- Loading State -->
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100" *ngIf="loading">
-  <div class="text-center">
-    <div class="spinner mx-auto mb-6"></div>
-    <p class="text-gray-600 text-lg">Loading your dashboard...</p>
-  </div>
-</div>
-
-<!-- Error State -->
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100" *ngIf="error && !loading">
-  <div class="text-center max-w-md mx-auto">
-    <h3 class="text-2xl font-bold text-gray-800 mb-4">⚠️ Error</h3>
-    <p class="text-gray-600 mb-8">{{ error }}</p>
-    <button class="btn btn-primary" (click)="logout()">Try Again</button>
-  </div>
-</div>
-
-<!-- Dashboard Content -->
-<div class="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100" *ngIf="!loading && !error && user">
-  <!-- Navbar -->
-  <nav class="fixed top-0 left-0 right-0 glass-effect border-b border-gray-200/50 z-50 py-4" (document:click)="closeUserMenu()">
-    <div class="container flex justify-between items-center">
-      <div class="nav-logo">
-        <h2 class="text-2xl font-bold gradient-text">🌿 Nestle Kebun Raya</h2>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="relative cursor-pointer group" (click)="showAlerts()">
-          <div class="user-avatar bg-warning-100 text-warning-600 hover:scale-110 transition-transform">
-            <span class="text-xl">⚠️</span>
-            <span class="absolute -top-1 -right-1 w-5 h-5 bg-error-500 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
+<app-layout [user]="user" [loading]="loading" [error]="error">
+  <div class="mx-8">
+    <!-- User Info Section -->
+    <div class="card mb-8" *ngIf="user">
+      <div class="flex items-center gap-8">
+        <div class="user-avatar user-avatar-large overflow-hidden">
+          <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar"
+            class="w-full h-full object-cover">
+          <div
+            class="w-full h-full bg-gradient-to-r from-primary-500 to-primary-600 text-white flex items-center justify-center font-bold text-2xl"
+            *ngIf="!user.avatar">
+            {{ user.name.charAt(0).toUpperCase() }}
           </div>
         </div>
-        <div class="relative cursor-pointer group" (click)="exportToExcel()">
-          <div class="user-avatar bg-primary-100 text-primary-600 hover:scale-110 transition-transform">
-            <span class="text-xl">📊</span>
-          </div>
-        </div>
-        <div class="relative" (click)="$event.stopPropagation(); toggleUserMenu()">
-          <div class="user-avatar cursor-pointer overflow-hidden hover:scale-110 transition-transform">
-            <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar" class="w-full h-full object-cover">
-            <div class="w-full h-full bg-gradient-to-r from-primary-500 to-primary-600 text-white flex items-center justify-center font-bold text-lg" *ngIf="!user.avatar">
-              {{ user.name.charAt(0).toUpperCase() }}
-            </div>
-          </div>
-          
-          <!-- User Dropdown Menu -->
-          <div class="absolute right-0 top-16 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden" *ngIf="showUserDropdown">
-            <div class="p-6 bg-gradient-to-r from-primary-50 to-primary-100">
-              <div class="flex items-center gap-4">
-                <div class="user-avatar overflow-hidden">
-                  <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar" class="w-full h-full object-cover">
-                  <div class="w-full h-full bg-gradient-to-r from-primary-500 to-primary-600 text-white flex items-center justify-center font-bold" *ngIf="!user.avatar">
-                    {{ user.name.charAt(0).toUpperCase() }}
-                  </div>
-                </div>
-                <div>
-                  <h4 class="font-semibold text-gray-900">{{ user.name }}</h4>
-                  <p class="text-sm text-gray-600">{{ user.email }}</p>
-                </div>
-              </div>
-            </div>
-            <div class="py-2">
-              <div class="px-6 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors" (click)="logout()">
-                <span class="text-lg">👤</span>
-                <span class="text-gray-700 font-medium">Manage Account</span>
-              </div>
-              <div class="px-6 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors" (click)="logout()">
-                <span class="text-lg">🚪</span>
-                <span class="text-gray-700 font-medium">Logout</span>
-              </div>
-            </div>
+
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ user.name }}</h2>
+          <p class="text-gray-600 mb-4 text-lg">{{ user.email }}</p>
+          <div
+            class="inline-flex items-center px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold">
+            <span>Pengguna Google</span>
           </div>
         </div>
       </div>
     </div>
-  </nav>
-  
-  <div class="pt-24 pb-8">
-    <div class="container">
-      <!-- User Info Section -->
-      <div class="card mb-8">
-        <div class="flex items-center gap-8">
-          <div class="user-avatar user-avatar-large overflow-hidden">
-            <img [src]="user.avatar || 'assets/default-avatar.png'" [alt]="user.name" *ngIf="user.avatar" class="w-full h-full object-cover">
-            <div class="w-full h-full bg-gradient-to-r from-primary-500 to-primary-600 text-white flex items-center justify-center font-bold text-2xl" *ngIf="!user.avatar">
-              {{ user.name.charAt(0).toUpperCase() }}
+
+    <!-- Temperature Sensors Section -->
+    <div class="card mb-8">
+      <div class="section-header">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">🌡️ Sensor Suhu</h2>
+        <p class="text-gray-600">Pemantauan suhu real-time di semua sensor (12 jam terakhir)</p>
+      </div>
+
+      <!-- Individual Sensor Rows -->
+      <div class="space-y-8" *ngIf="sensorsData.length > 0">
+        <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200"
+          *ngFor="let sensor of sensorsData; let i = index">
+          <div class="grid lg:grid-cols-12 gap-9">
+            <div class="chart-container lg:col-span-9">
+              <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Tren Suhu (12 Jam Terakhir)</h4>
+              </div>
+
+              <div class="chart-wrapper">
+                <apx-chart [series]="getChartSeries(sensor)" [chart]="getChartOptions(sensor)"
+                  [colors]="getChartColors(i)" [stroke]="getChartStroke()" [fill]="getChartFill()"
+                  [markers]="getChartMarkers(i)" [xaxis]="getChartXAxis()" [yaxis]="getChartYAxis()"
+                  [legend]="getChartLegend()" [tooltip]="getChartTooltip()" [grid]="getChartGrid()"
+                  [theme]="getChartTheme()">
+                </apx-chart>
+              </div>
             </div>
-          </div>
-          
-          <div class="flex-1">
-            <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ user.name }}</h2>
-            <p class="text-gray-600 mb-4 text-lg">{{ user.email }}</p>
-            <div class="inline-flex items-center px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold">
-              <span>Google User</span>
+            <div class="sensor-info lg:col-span-3">
+              <div class="card p-6 h-full flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-bold text-gray-900">{{ sensor.name }}</h3>
+                  <div class="flex items-center gap-3">
+                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'">
+                    </div>
+                    <span class="text-sm font-semibold"
+                      [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
+                      {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value !== null">
+                  <div class="sensor-value text-center">{{ sensor.latest_value }}°C</div>
+                  <div class="sensor-timestamp text-center">{{ sensor.latest_timestamp | date:'short' }}</div>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value === null">
+                  <div class="sensor-value-offline text-center">--°C</div>
+                  <div class="sensor-timestamp text-center">Tidak ada data</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Temperature Sensors Section -->
-      <div class="card mb-8">
-        <div class="section-header">
-          <h2 class="text-3xl font-bold text-gray-900 mb-3">🌡️ Temperature Sensors</h2>
-          <p class="text-gray-600">Real-time temperature monitoring across all sensors</p>
-        </div>
-        
-        <!-- Individual Sensor Rows -->
-        <div class="space-y-8" *ngIf="sensorsData.length > 0">
-          <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200" *ngFor="let sensor of sensorsData; let i = index">
-            <div class="grid lg:grid-cols-2 gap-8">
-              <div class="sensor-info">
+      <!-- No Data State -->
+      <div class="text-center py-16" *ngIf="sensorsData.length === 0">
+        <div class="text-8xl mb-6">🌡️</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Tidak Ada Sensor Suhu Ditemukan</h3>
+        <p class="text-gray-600 text-lg">Data sensor suhu tidak tersedia saat ini.</p>
+      </div>
+    </div>
+
+    <!-- Soil Moisture Sensors Section -->
+    <div class="card mb-8">
+      <div class="section-header">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">💧 Sensor Kelembaban Tanah</h2>
+        <p class="text-gray-600">Pemantauan kelembaban tanah real-time di semua sensor (12 jam terakhir)</p>
+      </div>
+
+      <div class="space-y-8" *ngIf="soilMoistureSensorsData.length > 0">
+        <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200"
+          *ngFor="let sensor of soilMoistureSensorsData; let i = index">
+          <div class="grid lg:grid-cols-12 gap-9">
+            <div class="chart-container lg:col-span-9">
+              <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Tren Kelembaban Tanah (12 Jam Terakhir)</h4>
+              </div>
+
+              <div class="chart-wrapper">
+                <apx-chart [series]="getSoilMoistureChartSeries(sensor)" [chart]="getChartOptions(sensor)"
+                  [colors]="getChartColors(i)" [stroke]="getChartStroke()" [fill]="getChartFill()"
+                  [markers]="getChartMarkers(i)" [xaxis]="getChartXAxis()" [yaxis]="getSoilMoistureChartYAxis()"
+                  [legend]="getChartLegend()" [tooltip]="getSoilMoistureChartTooltip()" [grid]="getChartGrid()"
+                  [theme]="getChartTheme()">
+                </apx-chart>
+              </div>
+            </div>
+
+            <div class="sensor-info lg:col-span-3">
+              <div class="card p-6 h-full flex flex-col">
                 <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-gray-900">{{ sensor.name }}</h3>
+                  <h3 class="text-xl font-bold text-gray-900">{{ sensor.name }}</h3>
                   <div class="flex items-center gap-3">
-                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'"></div>
-                    <span class="text-sm font-semibold" [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
+                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'">
+                    </div>
+                    <span class="text-sm font-semibold"
+                      [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
                       {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
                     </span>
                   </div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value !== null">
-                  <div class="sensor-value">{{ sensor.latest_value }}°C</div>
-                  <div class="sensor-timestamp">{{ sensor.latest_timestamp | date:'short' }}</div>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value !== null">
+                  <div class="sensor-value text-center">{{ sensor.latest_value }}%</div>
+                  <div class="sensor-timestamp text-center">{{ sensor.latest_timestamp | date:'short' }}</div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value === null">
-                  <div class="sensor-value-offline">--°C</div>
-                  <div class="sensor-timestamp">No data</div>
-                </div>
-              </div>
-              
-              <div class="chart-container">
-                <div class="mb-4">
-                  <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Temperature Trends (Last 24 Hours)</h4>
-                </div>
-                
-                <div class="chart-wrapper">
-                  <apx-chart
-                    [series]="getChartSeries(sensor)"
-                    [chart]="getChartOptions(sensor)"
-                    [colors]="getChartColors(i)"
-                    [stroke]="getChartStroke()"
-                    [fill]="getChartFill()"
-                    [markers]="getChartMarkers(i)"
-                    [xaxis]="getChartXAxis()"
-                    [yaxis]="getChartYAxis()"
-                    [legend]="getChartLegend()"
-                    [tooltip]="getChartTooltip()"
-                    [grid]="getChartGrid()"
-                    [theme]="getChartTheme()">
-                  </apx-chart>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value === null">
+                  <div class="sensor-value-offline text-center">--%</div>
+                  <div class="sensor-timestamp text-center">Tidak ada data</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- No Data State -->
-        <div class="text-center py-16" *ngIf="sensorsData.length === 0">
-          <div class="text-8xl mb-6">🌡️</div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">No Temperature Sensors Found</h3>
-          <p class="text-gray-600 text-lg">No temperature sensor data is available at the moment.</p>
         </div>
       </div>
 
-      <!-- Soil Moisture Sensors Section -->
-      <div class="card mb-8">
-        <div class="section-header">
-          <h2 class="text-3xl font-bold text-gray-900 mb-3">💧 Soil Moisture Sensors</h2>
-          <p class="text-gray-600">Real-time soil moisture monitoring across all sensors</p>
-        </div>
-        
-        <div class="space-y-8" *ngIf="soilMoistureSensorsData.length > 0">
-          <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200" *ngFor="let sensor of soilMoistureSensorsData; let i = index">
-            <div class="grid lg:grid-cols-2 gap-8">
-              <div class="sensor-info">
+      <div class="text-center py-16" *ngIf="soilMoistureSensorsData.length === 0">
+        <div class="text-8xl mb-6">💧</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Tidak Ada Sensor Kelembaban Tanah Ditemukan</h3>
+        <p class="text-gray-600 text-lg">Data sensor kelembaban tanah tidak tersedia saat ini.</p>
+      </div>
+    </div>
+
+    <!-- Light Sensors Section -->
+    <div class="card mb-8">
+      <div class="section-header">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">💡 Sensor Cahaya</h2>
+        <p class="text-gray-600">Pemantauan intensitas cahaya real-time di semua sensor (12 jam terakhir)</p>
+      </div>
+
+      <div class="space-y-8" *ngIf="lightSensorsData.length > 0">
+        <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200"
+          *ngFor="let sensor of lightSensorsData; let i = index">
+          <div class="grid lg:grid-cols-12 gap-9">
+            <div class="chart-container lg:col-span-9">
+              <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Tren Intensitas Cahaya (12 Jam Terakhir)</h4>
+              </div>
+
+              <div class="chart-wrapper">
+                <apx-chart [series]="getLightChartSeries(sensor)" [chart]="getChartOptions(sensor)"
+                  [colors]="getChartColors(i)" [stroke]="getChartStroke()" [fill]="getChartFill()"
+                  [markers]="getChartMarkers(i)" [xaxis]="getChartXAxis()" [yaxis]="getLightChartYAxis()"
+                  [legend]="getChartLegend()" [tooltip]="getLightChartTooltip()" [grid]="getChartGrid()"
+                  [theme]="getChartTheme()">
+                </apx-chart>
+              </div>
+            </div>
+
+            <div class="sensor-info lg:col-span-3">
+              <div class="card p-6 h-full flex flex-col">
                 <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-gray-900">{{ sensor.name }}</h3>
+                  <h3 class="text-xl font-bold text-gray-900">{{ sensor.name }}</h3>
                   <div class="flex items-center gap-3">
-                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'"></div>
-                    <span class="text-sm font-semibold" [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
+                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'">
+                    </div>
+                    <span class="text-sm font-semibold"
+                      [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
                       {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
                     </span>
                   </div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value !== null">
-                  <div class="sensor-value">{{ sensor.latest_value }}%</div>
-                  <div class="sensor-timestamp">{{ sensor.latest_timestamp | date:'short' }}</div>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value !== null">
+                  <div class="sensor-value text-center">{{ sensor.latest_value }} lux</div>
+                  <div class="sensor-timestamp text-center">{{ sensor.latest_timestamp | date:'short' }}</div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value === null">
-                  <div class="sensor-value-offline">--%</div>
-                  <div class="sensor-timestamp">No data</div>
-                </div>
-              </div>
-              
-              <div class="chart-container">
-                <div class="mb-4">
-                  <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Soil Moisture Trends (Last 24 Hours)</h4>
-                </div>
-                
-                <div class="chart-wrapper">
-                  <apx-chart
-                    [series]="getSoilMoistureChartSeries(sensor)"
-                    [chart]="getChartOptions(sensor)"
-                    [colors]="getChartColors(i)"
-                    [stroke]="getChartStroke()"
-                    [fill]="getChartFill()"
-                    [markers]="getChartMarkers(i)"
-                    [xaxis]="getChartXAxis()"
-                    [yaxis]="getSoilMoistureChartYAxis()"
-                    [legend]="getChartLegend()"
-                    [tooltip]="getSoilMoistureChartTooltip()"
-                    [grid]="getChartGrid()"
-                    [theme]="getChartTheme()">
-                  </apx-chart>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value === null">
+                  <div class="sensor-value-offline text-center">-- lux</div>
+                  <div class="sensor-timestamp text-center">Tidak ada data</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div class="text-center py-16" *ngIf="soilMoistureSensorsData.length === 0">
-          <div class="text-8xl mb-6">💧</div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">No Soil Moisture Sensors Found</h3>
-          <p class="text-gray-600 text-lg">No soil moisture sensor data is available at the moment.</p>
         </div>
       </div>
 
-      <!-- Light Sensors Section -->
-      <div class="card mb-8">
-        <div class="section-header">
-          <h2 class="text-3xl font-bold text-gray-900 mb-3">💡 Light Sensors</h2>
-          <p class="text-gray-600">Real-time light intensity monitoring across all sensors</p>
-        </div>
-        
-        <div class="space-y-8" *ngIf="lightSensorsData.length > 0">
-          <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200" *ngFor="let sensor of lightSensorsData; let i = index">
-            <div class="grid lg:grid-cols-2 gap-8">
-              <div class="sensor-info">
+      <div class="text-center py-16" *ngIf="lightSensorsData.length === 0">
+        <div class="text-8xl mb-6">💡</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Tidak Ada Sensor Cahaya Ditemukan</h3>
+        <p class="text-gray-600 text-lg">Data sensor cahaya tidak tersedia saat ini.</p>
+      </div>
+    </div>
+
+    <!-- Turbidity Sensors Section -->
+    <div class="card mb-8">
+      <div class="section-header">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">🌫️ Sensor Kekeruhan</h2>
+        <p class="text-gray-600">Pemantauan kekeruhan real-time di semua sensor (12 jam terakhir)</p>
+      </div>
+
+      <div class="space-y-8" *ngIf="turbiditySensorsData.length > 0">
+        <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200"
+          *ngFor="let sensor of turbiditySensorsData; let i = index">
+          <div class="grid lg:grid-cols-12 gap-9">
+            <div class="chart-container lg:col-span-9">
+              <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Tren Kekeruhan (12 Jam Terakhir)</h4>
+              </div>
+
+              <div class="chart-wrapper">
+                <apx-chart [series]="getTurbidityChartSeries(sensor)" [chart]="getChartOptions(sensor)"
+                  [colors]="getChartColors(i)" [stroke]="getChartStroke()" [fill]="getChartFill()"
+                  [markers]="getChartMarkers(i)" [xaxis]="getChartXAxis()" [yaxis]="getTurbidityChartYAxis()"
+                  [legend]="getChartLegend()" [tooltip]="getTurbidityChartTooltip()" [grid]="getChartGrid()"
+                  [theme]="getChartTheme()">
+                </apx-chart>
+              </div>
+            </div>
+
+            <div class="sensor-info lg:col-span-3">
+              <div class="card p-6 h-full flex flex-col">
                 <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-gray-900">{{ sensor.name }}</h3>
+                  <h3 class="text-xl font-bold text-gray-900">{{ sensor.name }}</h3>
                   <div class="flex items-center gap-3">
-                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'"></div>
-                    <span class="text-sm font-semibold" [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
+                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'">
+                    </div>
+                    <span class="text-sm font-semibold"
+                      [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
                       {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
                     </span>
                   </div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value !== null">
-                  <div class="sensor-value">{{ sensor.latest_value }} lux</div>
-                  <div class="sensor-timestamp">{{ sensor.latest_timestamp | date:'short' }}</div>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value !== null">
+                  <div class="sensor-value text-center">{{ sensor.latest_value }} NTU</div>
+                  <div class="sensor-timestamp text-center">{{ sensor.latest_timestamp | date:'short' }}</div>
                 </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value === null">
-                  <div class="sensor-value-offline">-- lux</div>
-                  <div class="sensor-timestamp">No data</div>
-                </div>
-              </div>
-              
-              <div class="chart-container">
-                <div class="mb-4">
-                  <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Light Intensity Trends (Last 24 Hours)</h4>
-                </div>
-                
-                <div class="chart-wrapper">
-                  <apx-chart
-                    [series]="getLightChartSeries(sensor)"
-                    [chart]="getChartOptions(sensor)"
-                    [colors]="getChartColors(i)"
-                    [stroke]="getChartStroke()"
-                    [fill]="getChartFill()"
-                    [markers]="getChartMarkers(i)"
-                    [xaxis]="getChartXAxis()"
-                    [yaxis]="getLightChartYAxis()"
-                    [legend]="getChartLegend()"
-                    [tooltip]="getLightChartTooltip()"
-                    [grid]="getChartGrid()"
-                    [theme]="getChartTheme()">
-                  </apx-chart>
+
+                <div class="flex-1 flex flex-col justify-center items-center text-center" *ngIf="sensor.latest_value === null">
+                  <div class="sensor-value-offline text-center">-- NTU</div>
+                  <div class="sensor-timestamp text-center">Tidak ada data</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div class="text-center py-16" *ngIf="lightSensorsData.length === 0">
-          <div class="text-8xl mb-6">💡</div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">No Light Sensors Found</h3>
-          <p class="text-gray-600 text-lg">No light sensor data is available at the moment.</p>
         </div>
       </div>
 
-      <!-- Turbidity Sensors Section -->
-      <div class="card mb-8">
-        <div class="section-header">
-          <h2 class="text-3xl font-bold text-gray-900 mb-3">🌫️ Turbidity Sensors</h2>
-          <p class="text-gray-600">Real-time turbidity monitoring across all sensors</p>
-        </div>
-        
-        <div class="space-y-8" *ngIf="turbiditySensorsData.length > 0">
-          <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-8 border border-primary-200" *ngFor="let sensor of turbiditySensorsData; let i = index">
-            <div class="grid lg:grid-cols-2 gap-8">
-              <div class="sensor-info">
-                <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-gray-900">{{ sensor.name }}</h3>
-                  <div class="flex items-center gap-3">
-                    <div class="status-dot" [class]="sensor.latest_value !== null ? 'status-online' : 'status-offline'"></div>
-                    <span class="text-sm font-semibold" [class]="sensor.latest_value !== null ? 'text-success-600' : 'text-gray-500'">
-                      {{ sensor.latest_value !== null ? 'Online' : 'Offline' }}
-                    </span>
-                  </div>
-                </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value !== null">
-                  <div class="sensor-value">{{ sensor.latest_value }} NTU</div>
-                  <div class="sensor-timestamp">{{ sensor.latest_timestamp | date:'short' }}</div>
-                </div>
-                
-                <div class="mb-6" *ngIf="sensor.latest_value === null">
-                  <div class="sensor-value-offline">-- NTU</div>
-                  <div class="sensor-timestamp">No data</div>
-                </div>
-              </div>
-              
-              <div class="chart-container">
-                <div class="mb-4">
-                  <h4 class="text-lg font-semibold text-gray-900">📊 {{ sensor.name }} - Turbidity Trends (Last 24 Hours)</h4>
-                </div>
-                
-                <div class="chart-wrapper">
-                  <apx-chart
-                    [series]="getTurbidityChartSeries(sensor)"
-                    [chart]="getChartOptions(sensor)"
-                    [colors]="getChartColors(i)"
-                    [stroke]="getChartStroke()"
-                    [fill]="getChartFill()"
-                    [markers]="getChartMarkers(i)"
-                    [xaxis]="getChartXAxis()"
-                    [yaxis]="getTurbidityChartYAxis()"
-                    [legend]="getChartLegend()"
-                    [tooltip]="getTurbidityChartTooltip()"
-                    [grid]="getChartGrid()"
-                    [theme]="getChartTheme()">
-                  </apx-chart>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="text-center py-16" *ngIf="turbiditySensorsData.length === 0">
-          <div class="text-8xl mb-6">🌫️</div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">No Turbidity Sensors Found</h3>
-          <p class="text-gray-600 text-lg">No turbidity sensor data is available at the moment.</p>
-        </div>
-      </div>
-      
-      <!-- Welcome Message and Feature Cards -->
-      <div class="card">
-        <div class="text-center mb-12">
-          <h3 class="text-3xl font-bold text-gray-900 mb-4">🎉 Successfully logged in!</h3>
-          <p class="text-gray-600 text-lg">You are now authenticated with Google OAuth.</p>
-        </div>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div class="feature-card">
-            <h4 class="feature-title">🔐 Secure Authentication</h4>
-            <p class="feature-description">Your account is securely authenticated through Google OAuth.</p>
-          </div>
-          
-          <div class="feature-card">
-            <h4 class="feature-title">👤 User Profile</h4>
-            <p class="feature-description">Your Google profile information is automatically synced.</p>
-          </div>
-          
-          <div class="feature-card">
-            <h4 class="feature-title">🌡️ Temperature Monitoring</h4>
-            <p class="feature-description">Real-time temperature data from multiple sensors across the facility.</p>
-          </div>
-          
-          <div class="feature-card">
-            <h4 class="feature-title">📊 Data Analytics</h4>
-            <p class="feature-description">Interactive charts and analytics for temperature trends and patterns.</p>
-          </div>
-        </div>
+      <div class="text-center py-16" *ngIf="turbiditySensorsData.length === 0">
+        <div class="text-8xl mb-6">🌫️</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Tidak Ada Sensor Kekeruhan Ditemukan</h3>
+        <p class="text-gray-600 text-lg">Data sensor kekeruhan tidak tersedia saat ini.</p>
       </div>
     </div>
   </div>
-</div>
+</app-layout>

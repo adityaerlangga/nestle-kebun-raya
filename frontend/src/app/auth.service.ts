@@ -17,6 +17,7 @@ export interface AuthResponse {
   success: boolean;
   user?: User;
   message?: string;
+  token?: string;
 }
 
 @Injectable({
@@ -32,8 +33,8 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
-    // Don't check auth status immediately on service construction
-    // Let components decide when to check
+    // Check auth status immediately on service construction
+    this.checkAuthStatus().subscribe();
   }
 
   public get currentUserValue(): User | null {
@@ -41,32 +42,66 @@ export class AuthService {
   }
 
   private getHttpOptions() {
+    const token = localStorage.getItem('auth_token');
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
     return {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }),
-      withCredentials: true
+      headers: headers,
+      withCredentials: false // Changed to false for token-based auth
     };
   }
 
   private checkAuthStatus(): Observable<boolean> {
-    return this.http.get<AuthResponse>(`${this.apiUrl}/user`, this.getHttpOptions()).pipe(
+    const token = localStorage.getItem('auth_token');
+    
+    console.log('🔍 Checking auth status, token exists:', !!token);
+    
+    // If no token exists, user is not authenticated
+    if (!token) {
+      console.log('❌ No token found, user is not authenticated');
+      this.currentUserSubject.next(null);
+      this.authChecked = true;
+      return new Observable<boolean>(observer => {
+        observer.next(false);
+        observer.complete();
+      });
+    }
+
+    const httpOptions = this.getHttpOptions();
+    console.log('🔍 Making auth request with token');
+
+    return this.http.get<AuthResponse>(`${this.apiUrl}/api/user`, httpOptions).pipe(
       map(response => {
+        console.log('✅ Auth response:', response);
         if (response.success && response.user) {
+          console.log('✅ User authenticated:', response.user.name);
           this.currentUserSubject.next(response.user);
           this.authChecked = true;
           return true;
         } else {
+          console.log('❌ Auth failed, clearing token');
           this.currentUserSubject.next(null);
           this.authChecked = true;
+          localStorage.removeItem('auth_token'); // Clear invalid token
           return false;
         }
       }),
       catchError(error => {
+        console.error('❌ Auth error:', error);
         this.currentUserSubject.next(null);
         this.authChecked = true;
-        return [false];
+        localStorage.removeItem('auth_token'); // Clear invalid token
+        return new Observable<boolean>(observer => {
+          observer.next(false);
+          observer.complete();
+        });
       })
     );
   }
@@ -76,12 +111,12 @@ export class AuthService {
   }
 
   logout(): Observable<AuthResponse> {
-    // Use GET request instead of POST to avoid CSRF token issues
-    return this.http.get<AuthResponse>(`${this.apiUrl}/logout`, this.getHttpOptions()).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/api/logout`, {}, this.getHttpOptions()).pipe(
       map(response => {
         if (response.success) {
           this.currentUserSubject.next(null);
           this.authChecked = false;
+          localStorage.removeItem('auth_token');
           this.router.navigate(['/']); // Redirect to landing page instead of login
         }
         return response;
@@ -90,6 +125,7 @@ export class AuthService {
         // Even if the request fails, clear the local state and redirect
         this.currentUserSubject.next(null);
         this.authChecked = false;
+        localStorage.removeItem('auth_token');
         this.router.navigate(['/']); // Redirect to landing page instead of login
         return [{
           success: true,
@@ -113,9 +149,49 @@ export class AuthService {
     );
   }
 
+  // Method to handle token from URL after OAuth redirect
+  handleAuthToken(token: string): Observable<boolean> {
+    localStorage.setItem('auth_token', token);
+    this.authChecked = false;
+    return this.checkAuthStatus();
+  }
+
   // Method to refresh auth status (useful after redirect)
   refreshAuthStatus(): void {
     this.authChecked = false;
     this.checkAuthStatus().subscribe();
+  }
+
+  // Method to make authenticated HTTP requests
+  getWithAuth(url: string, options: any = {}): Observable<any> {
+    const httpOptions = {
+      ...this.getHttpOptions(),
+      ...options
+    };
+    return this.http.get(`${this.apiUrl}${url}`, httpOptions);
+  }
+
+  postWithAuth(url: string, data: any, options: any = {}): Observable<any> {
+    const httpOptions = {
+      ...this.getHttpOptions(),
+      ...options
+    };
+    return this.http.post(`${this.apiUrl}${url}`, data, httpOptions);
+  }
+
+  putWithAuth(url: string, data: any, options: any = {}): Observable<any> {
+    const httpOptions = {
+      ...this.getHttpOptions(),
+      ...options
+    };
+    return this.http.put(`${this.apiUrl}${url}`, data, httpOptions);
+  }
+
+  deleteWithAuth(url: string, options: any = {}): Observable<any> {
+    const httpOptions = {
+      ...this.getHttpOptions(),
+      ...options
+    };
+    return this.http.delete(`${this.apiUrl}${url}`, httpOptions);
   }
 } 

@@ -30,12 +30,19 @@ export class SoilMoistureSensorService {
   constructor(private http: HttpClient) {}
 
   private getHttpOptions() {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
     return {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }),
-      withCredentials: true
+      headers: headers,
+      withCredentials: false // Changed to false for token-based auth
     };
   }
 
