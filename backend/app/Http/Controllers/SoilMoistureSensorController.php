@@ -23,8 +23,8 @@ class SoilMoistureSensorController extends Controller
                 // Get latest reading for each sensor
                 $latestReading = SoilMoistureSensor::getLatestReading($sensorName);
                 
-                // Get readings for the last 24 hours for chart
-                $readings = SoilMoistureSensor::getReadingsForSensor($sensorName, 24);
+                // Get readings for the last 12 hours for chart
+                $readings = SoilMoistureSensor::getReadingsForSensor($sensorName, 12);
                 
                 $sensorsData[] = [
                     'name' => $sensorName,
@@ -59,7 +59,7 @@ class SoilMoistureSensorController extends Controller
     public function show(string $sensorName): JsonResponse
     {
         try {
-            $readings = SoilMoistureSensor::getReadingsForSensor($sensorName, 24);
+            $readings = SoilMoistureSensor::getReadingsForSensor($sensorName, 12);
             
             $chartData = $readings->map(function ($reading) {
                 return [

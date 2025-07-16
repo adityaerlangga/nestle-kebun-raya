@@ -13,7 +13,7 @@ class TurbiditySensorSeeder extends Seeder
      */
     public function run(): void
     {
-        $sensorNames = ['Turbidity Sensor B'];
+        $sensorNames = ['Sensor Turbiditas 1'];
         
         foreach ($sensorNames as $sensorName) {
             // Generate 24 hours of data (one reading per hour)

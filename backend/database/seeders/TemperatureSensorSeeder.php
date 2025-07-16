@@ -14,29 +14,32 @@ class TemperatureSensorSeeder extends Seeder
      */
     public function run(): void
     {
-        $sensorNames = ['Sensor A'];
+        $sensorNames = ['Sensor Suhu 1'];
         
-        // Generate data for the last 24 hours
-        $startTime = Carbon::now()->subHours(24);
-        
+        // Set end time as now, and start time as 24 hours ago
+        $endTime = Carbon::now();
+        $startTime = $endTime->copy()->subHours(24);
+        $intervalSeconds = 30; // 2 data per minute
+        $totalData = (24 * 60 * 60) / $intervalSeconds; // 24 hours worth of data, every 15 seconds
+
         foreach ($sensorNames as $sensorName) {
             $currentTime = $startTime->copy();
-            
-            // Generate a reading every 2 hours for the last 24 hours
-            for ($i = 0; $i < 12; $i++) {
-                // Generate realistic temperature values between 20-35°C with some variation
-                $baseTemp = 25 + ($sensorName === 'Sensor A' ? 2 : ($sensorName === 'Sensor B' ? -1 : 0));
+            for ($i = 0; $i < $totalData; $i++) {
+                $baseTemp = mt_rand(20, 35);
                 $variation = rand(-3, 3);
                 $temperature = $baseTemp + $variation + (sin($i * 0.5) * 2); // Add some sine wave variation
-                
+
                 TemperatureSensor::create([
                     'name' => $sensorName,
                     'value' => round($temperature, 2),
                     'created_at' => $currentTime,
                     'updated_at' => $currentTime
                 ]);
-                
-                $currentTime->addHours(2);
+
+                $currentTime->addSeconds($intervalSeconds);
+                if ($currentTime->greaterThan($endTime)) {
+                    break;
+                }
             }
         }
     }

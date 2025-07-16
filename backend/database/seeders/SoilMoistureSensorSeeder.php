@@ -13,7 +13,7 @@ class SoilMoistureSensorSeeder extends Seeder
      */
     public function run(): void
     {
-        $sensorNames = ['Soil Sensor C'];
+        $sensorNames = ['Sensor Kelembaban Tanah 1'];
         
         foreach ($sensorNames as $sensorName) {
             // Generate 24 hours of data (one reading per hour)

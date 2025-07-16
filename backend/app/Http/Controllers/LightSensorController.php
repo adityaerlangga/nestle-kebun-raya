@@ -23,8 +23,8 @@ class LightSensorController extends Controller
                 // Get latest reading for each sensor
                 $latestReading = LightSensor::getLatestReading($sensorName);
                 
-                // Get readings for the last 24 hours for chart
-                $readings = LightSensor::getReadingsForSensor($sensorName, 24);
+                // Get readings for the last 12 hours for chart
+                $readings = LightSensor::getReadingsForSensor($sensorName, 12);
                 
                 $sensorsData[] = [
                     'name' => $sensorName,
@@ -59,7 +59,7 @@ class LightSensorController extends Controller
     public function show(string $sensorName): JsonResponse
     {
         try {
-            $readings = LightSensor::getReadingsForSensor($sensorName, 24);
+            $readings = LightSensor::getReadingsForSensor($sensorName, 12);
             
             $chartData = $readings->map(function ($reading) {
                 return [

@@ -13,7 +13,7 @@ class LightSensorSeeder extends Seeder
      */
     public function run(): void
     {
-        $sensorNames = ['Light Sensor D'];
+        $sensorNames = ['Sensor Cahaya 1'];
         
         foreach ($sensorNames as $sensorName) {
             // Generate 24 hours of data (one reading per hour)
