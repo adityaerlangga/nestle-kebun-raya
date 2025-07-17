@@ -11,6 +11,7 @@ export interface User {
   email: string;
   avatar?: string;
   google_id?: string;
+  role?: string;
 }
 
 export interface AuthResponse {

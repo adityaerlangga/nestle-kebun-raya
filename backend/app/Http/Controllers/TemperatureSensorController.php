@@ -23,8 +23,8 @@ class TemperatureSensorController extends Controller
                 // Get latest reading for each sensor
                 $latestReading = TemperatureSensor::getLatestReading($sensorName);
                 
-                // Get readings for the last 12 hours for chart
-                $readings = TemperatureSensor::getReadingsForSensor($sensorName, 12);
+                // Get readings for the last 30 minutes for chart
+                $readings = TemperatureSensor::getReadingsForSensor($sensorName, 0.5);
                 
                 $sensorsData[] = [
                     'name' => $sensorName,
@@ -59,7 +59,7 @@ class TemperatureSensorController extends Controller
     public function show(string $sensorName): JsonResponse
     {
         try {
-            $readings = TemperatureSensor::getReadingsForSensor($sensorName, 12);
+            $readings = TemperatureSensor::getReadingsForSensor($sensorName, 0.5);
             
             $chartData = $readings->map(function ($reading) {
                 return [
@@ -95,6 +95,14 @@ class TemperatureSensorController extends Controller
                 'name' => 'required|string|max:255',
                 'value' => 'required|numeric|between:-50,100'
             ]);
+
+            $allowedNames = ['Sensor Suhu 1'];
+            if(!in_array($request->name, $allowedNames)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid sensor name'
+                ], 400);
+            }
             
             $sensor = TemperatureSensor::create([
                 'name' => $request->name,
@@ -133,6 +141,45 @@ class TemperatureSensorController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch sensor names',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Store multiple temperature readings in batch
+     */
+    public function storeBatch(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'readings' => 'required|array',
+                'readings.*.name' => 'required|string|max:255',
+                'readings.*.value' => 'required|numeric|between:-50,100'
+            ]);
+            
+            $readings = $request->readings;
+            $savedReadings = [];
+            
+            foreach ($readings as $reading) {
+                $sensor = TemperatureSensor::create([
+                    'name' => $reading['name'],
+                    'value' => $reading['value']
+                ]);
+                
+                $savedReadings[] = $sensor;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => count($savedReadings) . ' temperature readings stored successfully',
+                'data' => $savedReadings
+            ], 201);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to store temperature readings',
                 'error' => $e->getMessage()
             ], 500);
         }

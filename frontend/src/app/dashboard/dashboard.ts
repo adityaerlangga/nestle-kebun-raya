@@ -8,6 +8,7 @@ import { LightSensorService, SensorData as LightSensorData } from '../light-sens
 import { TurbiditySensorService, SensorData as TurbiditySensorData } from '../turbidity-sensor.service';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { LayoutComponent } from '../shared/layout/layout';
+import { PaginationComponent } from '../shared/pagination/pagination';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -17,10 +18,35 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
 
+// Table data interfaces
+interface SensorTableData {
+  id: number;
+  name: string;
+  value: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PaginatedData {
+  current_page: number;
+  data: SensorTableData[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: any[];
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgApexchartsModule, LayoutComponent],
+  imports: [CommonModule, NgApexchartsModule, LayoutComponent, PaginationComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -28,7 +54,11 @@ export class DashboardComponent implements OnInit {
   user: User | null = null;
   loading = true;
   error = '';
-  
+
+  // System status
+  system: { id: number, is_active: boolean } | null = null;
+  systemLoading = false;
+
   // Temperature sensor data
   sensorsData: SensorData[] = [];
   // Soil moisture sensor data
@@ -37,6 +67,20 @@ export class DashboardComponent implements OnInit {
   lightSensorsData: LightSensorData[] = [];
   // Turbidity sensor data
   turbiditySensorsData: TurbiditySensorData[] = [];
+
+
+
+  // Table data
+  temperatureTableData: PaginatedData | null = null;
+  soilMoistureTableData: PaginatedData | null = null;
+  lightTableData: PaginatedData | null = null;
+  turbidityTableData: PaginatedData | null = null;
+
+  // Loading states for tables
+  temperatureTableLoading = false;
+  soilMoistureTableLoading = false;
+  lightTableLoading = false;
+  turbidityTableLoading = false;
 
 
 
@@ -57,7 +101,7 @@ export class DashboardComponent implements OnInit {
     private soilMoistureSensorService: SoilMoistureSensorService,
     private lightSensorService: LightSensorService,
     private turbiditySensorService: TurbiditySensorService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Check authentication status
@@ -66,18 +110,66 @@ export class DashboardComponent implements OnInit {
         this.router.navigate(['/']); // Redirect to landing page instead of login
         return;
       }
-      
+
       // Get user data from the observable
       this.authService.currentUser$.subscribe(user => {
         this.user = user;
+        console.log("Rhis User", this.user);
         this.loading = false;
-        
+
+        // Load system status
+        this.getSystem();
+
         // Load all sensor data after user is loaded
         this.loadTemperatureSensors();
         this.loadSoilMoistureSensors();
         this.loadLightSensors();
         this.loadTurbiditySensors();
+
+        // Load table data
+        this.loadTemperatureTableData();
+        this.loadSoilMoistureTableData();
+        this.loadLightTableData();
+        this.loadTurbidityTableData();
       });
+    });
+  }
+
+  getSystem(): void {
+    this.systemLoading = true;
+    this.authService.getWithAuth('/api/system').subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.system = response.data;
+        } else {
+          console.error('Failed to load system status');
+        }
+        this.systemLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading system status:', error);
+        this.systemLoading = false;
+      }
+    });
+  }
+
+  toggleSystemActivation(): void {
+    if (!this.system) return;
+
+    this.systemLoading = true;
+    this.authService.putWithAuth(`/api/system/${this.system.id}/toggle-access`, {}).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.system = response.data;
+        } else {
+          console.error('Failed to toggle system activation');
+        }
+        this.systemLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error toggling system activation:', error);
+        this.systemLoading = false;
+      }
     });
   }
 
@@ -226,9 +318,9 @@ export class DashboardComponent implements OnInit {
     return {
       type: 'datetime',
       labels: {
-        formatter: function(value: string) {
+        formatter: function (value: string) {
           // value is a timestamp in ms
-          return dayjs.tz(Number(value), 'Asia/Jakarta').format('MMMM Do, YYYY HH.mm');
+          return dayjs.tz(Number(value), 'Asia/Jakarta').format('HH.mm');
         },
         style: {
           colors: '#666',
@@ -277,7 +369,7 @@ export class DashboardComponent implements OnInit {
         format: 'dd MMM yyyy HH:mm'
       },
       y: {
-        formatter: function(value: number) {
+        formatter: function (value: number) {
           return value.toFixed(2) + ' °C';
         }
       }
@@ -400,6 +492,125 @@ export class DashboardComponent implements OnInit {
       x: { format: 'dd MMM yyyy HH:mm' },
       y: { formatter: (value: number) => value.toFixed(2) + ' NTU' }
     };
+  }
+
+  // Table data loading methods
+  loadTemperatureTableData(page: number = 1): void {
+    this.temperatureTableLoading = true;
+    const params = new URLSearchParams();
+    params.append('per_page', '5');
+    if (page > 1) params.append('page', page.toString());
+
+    this.authService.getWithAuth(`/api/export/temperature-sensors-data?${params.toString()}`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.temperatureTableData = response.data;
+        } else {
+          console.error('Failed to load temperature table data');
+        }
+        this.temperatureTableLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading temperature table data:', error);
+        this.temperatureTableLoading = false;
+      }
+    });
+  }
+
+  loadSoilMoistureTableData(page: number = 1): void {
+    this.soilMoistureTableLoading = true;
+    const params = new URLSearchParams();
+    params.append('per_page', '5');
+    if (page > 1) params.append('page', page.toString());
+
+    this.authService.getWithAuth(`/api/export/soil-moisture-sensors-data?${params.toString()}`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.soilMoistureTableData = response.data;
+        } else {
+          console.error('Failed to load soil moisture table data');
+        }
+        this.soilMoistureTableLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading soil moisture table data:', error);
+        this.soilMoistureTableLoading = false;
+      }
+    });
+  }
+
+  loadLightTableData(page: number = 1): void {
+    this.lightTableLoading = true;
+    const params = new URLSearchParams();
+    params.append('per_page', '5');
+    if (page > 1) params.append('page', page.toString());
+
+    this.authService.getWithAuth(`/api/export/light-sensors-data?${params.toString()}`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.lightTableData = response.data;
+        } else {
+          console.error('Failed to load light table data');
+        }
+        this.lightTableLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading light table data:', error);
+        this.lightTableLoading = false;
+      }
+    });
+  }
+
+  loadTurbidityTableData(page: number = 1): void {
+    this.turbidityTableLoading = true;
+    const params = new URLSearchParams();
+    params.append('per_page', '5');
+    if (page > 1) params.append('page', page.toString());
+
+    this.authService.getWithAuth(`/api/export/turbidity-sensors-data?${params.toString()}`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.turbidityTableData = response.data;
+        } else {
+          console.error('Failed to load turbidity table data');
+        }
+        this.turbidityTableLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading turbidity table data:', error);
+        this.turbidityTableLoading = false;
+      }
+    });
+  }
+
+  // Pagination methods
+  onTemperatureTablePageChange(page: number): void {
+    this.loadTemperatureTableData(page);
+  }
+
+  onSoilMoistureTablePageChange(page: number): void {
+    this.loadSoilMoistureTableData(page);
+  }
+
+  onLightTablePageChange(page: number): void {
+    this.loadLightTableData(page);
+  }
+
+  onTurbidityTablePageChange(page: number): void {
+    this.loadTurbidityTableData(page);
+  }
+
+  // Helper method for date formatting
+  formatTableDate(dateString: string): string {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
   logout(): void {

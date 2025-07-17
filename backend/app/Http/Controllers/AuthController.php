@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use App\Enums\RoleEnum;
+
 
 class AuthController extends Controller
 {
@@ -32,6 +34,9 @@ class AuthController extends Controller
                 'email' => $googleUser->email,
                 'avatar' => $googleUser->avatar,
             ]);
+
+            // Assign role pengunjung
+            $user->assignRole(RoleEnum::PENGUNJUNG);
 
             // Create Sanctum token for API access
             $token = $user->createToken('google-auth-token')->plainTextToken;
@@ -98,6 +103,9 @@ class AuthController extends Controller
                 'message' => 'User not authenticated'
             ], 401);
         }
+
+        // Append Role
+        $user->role = $user->getRoleNames()->first();
 
         return response()->json([
             'success' => true,

@@ -9,6 +9,8 @@ use App\Http\Controllers\TurbiditySensorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\SystemController;
+use App\Http\Controllers\AlertController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +52,12 @@ Route::get('/turbidity-sensors', [TurbiditySensorController::class, 'index']);
 Route::get('/turbidity-sensors/{sensorName}', [TurbiditySensorController::class, 'show']);
 Route::post('/turbidity-sensors', [TurbiditySensorController::class, 'store']);
 Route::get('/turbidity-sensors-names', [TurbiditySensorController::class, 'getSensorNames']);
+
+Route::get('/alert', [AlertController::class, 'index']);
+Route::post('/alert/update-alert', [AlertController::class, 'updateAlert']);
+
+Route::get('/system', [SystemController::class, 'index']);
+Route::put('/system/{id}/toggle-access', [SystemController::class, 'toggleActivate']);
 
 // User Management routes
 Route::middleware('auth:sanctum')->group(function () {

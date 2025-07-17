@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Enums\RoleEnum;
 
 class UserController extends Controller
 {
@@ -28,9 +29,9 @@ class UserController extends Controller
             ->orderBy('name')
             ->paginate($perPage);
         
-        // Transform the data to include can_access based on admin role
+        // Transform the data to include can_access based on peneliti role
         $users->getCollection()->transform(function ($user) {
-            $user->can_access = $user->hasRole('admin');
+            $user->can_access = $user->hasRole(RoleEnum::PENELITI);
             return $user;
         });
         
@@ -52,14 +53,16 @@ class UserController extends Controller
         }
 
         try {
-            if ($user->hasRole('admin')) {
-                // Remove admin role
-                $user->removeRole('admin');
-                $message = 'Admin access removed successfully';
+            if ($user->hasRole(RoleEnum::PENELITI)) {
+                // Remove peneliti role
+                $user->removeRole(RoleEnum::PENELITI);
+                $user->assignRole(RoleEnum::PENGUNJUNG);
+                $message = 'Peneliti access removed successfully';
             } else {
-                // Add admin role
-                $user->assignRole('admin');
-                $message = 'Admin access granted successfully';
+                // Add peneliti role
+                $user->assignRole(RoleEnum::PENELITI);
+                $user->removeRole(RoleEnum::PENGUNJUNG);
+                $message = 'Peneliti access granted successfully';
             }
             
             return response()->json([

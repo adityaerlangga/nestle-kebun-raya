@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../../auth.service';
@@ -10,13 +10,17 @@ import { AuthService, User } from '../../auth.service';
   templateUrl: './layout.html',
   styleUrls: ['./layout.css']
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   @Input() user: User | null = null;
   @Input() loading = false;
   @Input() error = '';
 
   showUserDropdown = false;
   mobileMenuOpen = false;
+
+  // System status
+  alert: any;
+  alertLoading = false;
 
   // Modal state and mock fuzzy logic result
   showAlertModal = false;
@@ -30,7 +34,7 @@ export class LayoutComponent {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   toggleUserMenu(): void {
     this.showUserDropdown = !this.showUserDropdown;
@@ -47,6 +51,28 @@ export class LayoutComponent {
   navigateToManageAccount(): void {
     this.router.navigate(['/manage-account']);
     this.closeUserMenu();
+  }
+
+  getAlert(): void {
+    this.alertLoading = true;
+    this.authService.getWithAuth('/api/alert').subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.alert = response.data ? response.data : [];
+          if(this.alert) {
+            this.alert.type_lower = this.alert.type.toLowerCase()
+          }
+          console.log(this.alert)
+        } else {
+          console.error('Failed to load alert status');
+        }
+        this.alertLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading alert status:', error);
+        this.alertLoading = false;
+      }
+    });
   }
 
   logout(): void {
@@ -92,5 +118,16 @@ export class LayoutComponent {
 
   goToContact(): void {
     this.router.navigate(['/contact']);
+  }
+
+  loadUserDetail(): void {
+    console.log("This user:", this.user)
+  }
+
+  ngOnInit(): void {
+    // setInterval(() => {
+    //   this.loadUserDetail();
+    // }, 1000);
+    this.getAlert();
   }
 } 

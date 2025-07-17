@@ -23,8 +23,8 @@ class LightSensorController extends Controller
                 // Get latest reading for each sensor
                 $latestReading = LightSensor::getLatestReading($sensorName);
                 
-                // Get readings for the last 12 hours for chart
-                $readings = LightSensor::getReadingsForSensor($sensorName, 12);
+                // Get readings for the last 30 minutes for chart
+                $readings = LightSensor::getReadingsForSensor($sensorName, 0.5);
                 
                 $sensorsData[] = [
                     'name' => $sensorName,
@@ -59,7 +59,7 @@ class LightSensorController extends Controller
     public function show(string $sensorName): JsonResponse
     {
         try {
-            $readings = LightSensor::getReadingsForSensor($sensorName, 12);
+            $readings = LightSensor::getReadingsForSensor($sensorName, 0.5);
             
             $chartData = $readings->map(function ($reading) {
                 return [
@@ -95,6 +95,14 @@ class LightSensorController extends Controller
                 'name' => 'required|string|max:255',
                 'value' => 'required|numeric|min:0'
             ]);
+
+            $allowedNames = ['Sensor Cahaya 1'];
+            if(!in_array($request->name, $allowedNames)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid sensor name'
+                ], 400);
+            }
             
             $sensor = LightSensor::create([
                 'name' => $request->name,
